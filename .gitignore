@@ -1,0 +1,10 @@
+.agent/
+.env
+.venv
+__pycache__
+
+#
+session_track.*
+
+#
+creditflow_context/

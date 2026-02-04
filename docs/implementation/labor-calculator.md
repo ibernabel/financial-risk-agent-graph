@@ -1,68 +1,62 @@
-# Labor Benefits Calculator (Dominican Republic)
+# Labor Benefits Calculator Implementation
 
-## Overview
+The Labor Benefits Calculator is a deterministic tool designed to calculate legal compensation (Prestaciones Laborales) according to the Dominican Republic Labor Code.
 
-The `LaborCalculator` is a specialized tool developed to accurately compute labor benefits ("Prestaciones Laborales") based on the Labor Code of the Dominican Republic (Law 16-92). This tool provides high-fidelity results that match the official Ministry of Labor (MT) calculator while operating as an offline, deterministic micro-service component.
+## Features
 
-## Core Logic & Formulae
+- **Inclusive Time Calculation**: Correctly handles date ranges as inclusive (e.g., Jan 1 to Dec 31 is 1 full year).
+- **Notice Pay (Preaviso)**: Calculates days and amount based on Art. 76.
+- **Severance Pay (Cesantía)**: Calculates days and amount based on Art. 80, including fractional years.
+- **Christmas Salary (Salario de Navidad)**: Calculates the proportional amount for the current calendar year.
+- **Type Safety**: Uses `TypedDict` and strict type hints for robust data handling.
+- **Validation**: Ensures logical date ranges and positive salary inputs.
 
-### 1. Salary Normalization
+## Technical Details
 
-The most critical factor for matching official figures is the daily salary divisor.
+### Key Classes
 
-- **Monthly to Daily Divisor**: `23.83`
-- **Formula**: `Daily Rate = Monthly Salary / 23.83`
-- **Note**: Intermediate calculations maintain high precision (Decimal 28+). Rounding is only applied to individual component totals for reporting.
+- `LaborCalculator`: Main engine for calculation.
+- `LaborBenefitResult`: Schema for the calculation output.
 
-### 2. Time Worked Calculation
+### Constants
 
-Calculations are **inclusive** of the end date.
+- `DAILY_SALARY_DIVISOR`: `23.83` (Standard DIVARD divisor).
 
-- **Tenure Computation**: `(End Date + 1 Day) - Start Date`
-- This ensures that a worker leaving on Dec 31st after starting Jan 1st is credited with exactly 1 full year.
+### Calculation Logic
 
-### 3. Benefit Logic (Standard Parameters)
+#### Time Difference
 
-#### Notice (Preaviso) - Art. 76
+The tool calculates years, months, and days by adding 1 day to the end date to ensure inclusivity.
 
-| Tenure         | Notice Days |
-| -------------- | ----------- |
-| 3 to 6 months  | 7 days      |
-| 6 to 12 months | 14 days     |
-| 1 year or more | 28 days     |
+#### Notice (Art. 76)
 
-#### Severance (Cesantía) - Art. 80
+- > = 1 year: 28 days
+- 6-12 months: 14 days
+- 3-6 months: 7 days
 
-| Tenure          | Severance Accrual |
-| --------------- | ----------------- |
-| 3 to 6 months   | 6 days            |
-| 6 to 12 months  | 13 days           |
-| 1 to 5 years    | 21 days per year  |
-| 5 years or more | 23 days per year  |
+#### Severance (Art. 80)
 
-**Progressive Accrual (> 1 year):**
-Once the one-year threshold is crossed, fractional years accrue additional days based on the 3-6 and 6-12 month ranges.
+- > = 5 years: 23 days per year
+- 1-5 years: 21 days per year
+- 6-12 months: 13 days
+- 3-6 months: 6 days
+- _Fractional_: If >= 1 year, extra months are added:
+  - 6-12 months: +13 days
+  - 3-6 months: +6 days
 
-#### Christmas Salary (Salario de Navidad)
+## Usage
 
-- **Law**: One-twelfth of the total ordinary salary earned in the calendar year.
-- **Implementation**: `(Sum of Monthly Salaries) / 12`
-- For constant salaries, this simplifies to `Monthly Salary * (Months Worked in Year / 12)`.
+```python
+from datetime import date
+from decimal import Decimal
+from app.tools.labor_calculator import LaborCalculator
 
-## Technical Implementation
+calc = LaborCalculator()
+result = calc.calculate(
+    start_date=date(2023, 1, 1),
+    end_date=date(2023, 12, 31),
+    monthly_salary=Decimal("30000")
+)
 
-- **File**: `app/tools/labor_calculator.py`
-- **Test Suite**: `tests/test_labor_calculator.py`
-- **Language**: Python (utilizing `decimal` library for precise arithmetic).
-
-## Validation Result (Golden Case)
-
-Verified against MT Official Calculator:
-
-- **Tenure**: 6 Years
-- **Salary**: RD$ 29,988.00
-- **Total Benefits**: RD$ 238,884.69 (Matches exactly)
-
----
-
-_Last Updated: February 4, 2026_
+print(result['total_received'])
+```

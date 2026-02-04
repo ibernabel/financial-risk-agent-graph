@@ -1,6 +1,6 @@
 .agent/
 .env
-.venv
+.venv/
 __pycache__
 
 # Session tracking

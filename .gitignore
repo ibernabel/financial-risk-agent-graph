@@ -3,8 +3,11 @@
 .venv
 __pycache__
 
-#
+# Session tracking
 session_track.*
 
-#
+# Project creation context
 creditflow_context/
+
+# Python Version files
+.python-version

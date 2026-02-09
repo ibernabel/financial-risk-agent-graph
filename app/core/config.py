@@ -58,6 +58,14 @@ class LLMSettings(BaseSettings):
     timeout: int = Field(
         default=60, description="LLM request timeout in seconds")
 
+    # OCR-specific settings (using GPT-4o-mini for cost efficiency)
+    ocr_llm_model: str = Field(
+        default="gpt-4o-mini", description="LLM model for OCR tasks")
+    ocr_temperature: float = Field(
+        default=0.0, description="Temperature for OCR (deterministic)")
+    ocr_max_tokens: int = Field(
+        default=4096, description="Max tokens for OCR responses")
+
     model_config = SettingsConfigDict(env_prefix="")
 
 

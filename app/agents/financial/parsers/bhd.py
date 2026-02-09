@@ -16,10 +16,11 @@ from app.tools.ocr import extract_document_data
 class Transaction(BaseModel):
     """Individual bank transaction."""
 
-    date: date = Field(description="Transaction date")
+    txn_date: date = Field(description="Transaction date")
     description: str = Field(description="Transaction description")
     amount: Decimal = Field(description="Transaction amount")
-    type: Literal["CREDIT", "DEBIT"] = Field(description="Transaction type")
+    transaction_type: Literal["CREDIT", "DEBIT"] = Field(
+        description="Transaction type")
     balance: Decimal = Field(description="Account balance after transaction")
     category: Literal["SALARY", "TRANSFER", "PAYMENT", "OTHER"] = Field(
         default="OTHER", description="Transaction category"
@@ -42,7 +43,7 @@ class TransactionSummary(BaseModel):
     salary_deposits: list[Decimal] = Field(
         default_factory=list, description="Detected salary deposits"
     )
-    detected_payroll_day: int | None = Field(
+    payroll_day: int | None = Field(
         default=None, description="Detected payroll day (1-31)"
     )
 
@@ -50,9 +51,9 @@ class TransactionSummary(BaseModel):
 class BankStatementData(BaseModel):
     """Structured bank statement data."""
 
-    bank_name: str = Field(description="Bank name")
     account_number: str = Field(description="Account number (masked)")
-    period: DateRange = Field(description="Statement period")
+    period_start: date = Field(description="Statement period start date")
+    period_end: date = Field(description="Statement period end date")
     transactions: list[Transaction] = Field(description="All transactions")
     summary: TransactionSummary = Field(description="Summary statistics")
 
@@ -65,7 +66,7 @@ Extract ALL transactions from this bank statement PDF.
 
 **Required Information:**
 1. Account number (mask all but last 4 digits, e.g., "****1234")
-2. Statement period (start and end dates)
+2. Statement period start and end dates (YYYY-MM-DD format)
 3. All transactions with:
    - Date (YYYY-MM-DD format)
    - Description (as shown on statement)
@@ -109,9 +110,6 @@ async def parse_bhd_statement(pdf_path: str) -> BankStatementData:
         response_schema=BankStatementData,
     )
 
-    # Post-process: Ensure bank name is set
-    statement_data.bank_name = "Banco BHD"
-
     # Calculate summary if not provided by LLM
     if not statement_data.summary.total_credits:
         statement_data.summary = _calculate_summary(
@@ -122,8 +120,9 @@ async def parse_bhd_statement(pdf_path: str) -> BankStatementData:
 
 def _calculate_summary(transactions: list[Transaction]) -> TransactionSummary:
     """Calculate summary statistics from transactions."""
-    credits = [t.amount for t in transactions if t.type == "CREDIT"]
-    debits = [abs(t.amount) for t in transactions if t.type == "DEBIT"]
+    credits = [t.amount for t in transactions if t.transaction_type == "CREDIT"]
+    debits = [abs(t.amount)
+              for t in transactions if t.transaction_type == "DEBIT"]
     balances = [t.balance for t in transactions]
 
     total_credits = sum(credits, Decimal("0"))
@@ -142,7 +141,7 @@ def _calculate_summary(transactions: list[Transaction]) -> TransactionSummary:
         total_debits=total_debits,
         average_balance=average_balance,
         salary_deposits=salary_deposits,
-        detected_payroll_day=payroll_day,
+        payroll_day=payroll_day,
     )
 
 
@@ -156,7 +155,7 @@ def _detect_salary_deposits(transactions: list[Transaction]) -> list[Decimal]:
     3. Check for monthly recurrence
     4. Return amounts classified as salary
     """
-    credits = [t for t in transactions if t.type == "CREDIT"]
+    credits = [t for t in transactions if t.transaction_type == "CREDIT"]
 
     if not credits:
         return []
@@ -201,7 +200,7 @@ def _detect_payroll_day(
     # Find transactions matching salary amounts
     salary_txns = [
         t for t in transactions
-        if t.type == "CREDIT" and any(
+        if t.transaction_type == "CREDIT" and any(
             abs(t.amount - salary) / salary <= Decimal("0.10")
             for salary in salary_deposits
         )
@@ -213,7 +212,7 @@ def _detect_payroll_day(
     # Count frequency of each day
     day_counts: dict[int, int] = {}
     for txn in salary_txns:
-        day = txn.date.day
+        day = txn.txn_date.day
         day_counts[day] = day_counts.get(day, 0) + 1
 
     # Return most common day

@@ -28,18 +28,25 @@ def test_triage_result_creation():
 
 def test_financial_analysis_creation():
     """Test FinancialAnalysis model creation."""
+    from decimal import Decimal
+
     analysis = FinancialAnalysis(
-        total_credits=100000.0,
-        total_debits=80000.0,
-        average_balance=20000.0,
-        salary_deposits=[35000.0, 35000.0],
-        detected_payroll_day=15,
-        detected_patterns=["PATTERN1"],
+        bank_account_verified=True,
+        salary_verified=True,
+        detected_salary_amount=Decimal("35000.0"),
+        total_monthly_credits=Decimal("100000.0"),
+        total_monthly_debits=Decimal("80000.0"),
+        average_balance=Decimal("20000.0"),
+        credit_score=750,
+        risk_flags=["FIN-01: Fast Withdrawal"],
+        financial_behavior_score=85,
     )
 
-    assert analysis.total_credits == 100000.0
-    assert analysis.average_balance == 20000.0
-    assert len(analysis.salary_deposits) == 2
+    assert analysis.bank_account_verified is True
+    assert analysis.total_monthly_credits == Decimal("100000.0")
+    assert analysis.average_balance == Decimal("20000.0")
+    assert analysis.credit_score == 750
+    assert analysis.financial_behavior_score == 85
 
 
 def test_osint_findings_creation():

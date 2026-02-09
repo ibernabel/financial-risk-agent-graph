@@ -5,6 +5,7 @@ Defines the shared state schema and nested models for agent communication.
 """
 
 from typing import Optional
+from decimal import Decimal
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage
 
@@ -23,17 +24,43 @@ class TriageResult(BaseModel):
 class FinancialAnalysis(BaseModel):
     """Result from the Financial Analyst Agent."""
 
-    total_credits: float = Field(description="Total credits in period")
-    total_debits: float = Field(description="Total debits in period")
-    average_balance: float = Field(description="Average account balance")
-    salary_deposits: list[float] = Field(
-        default_factory=list, description="Detected salary deposits"
+    # Bank account verification
+    bank_account_verified: bool = Field(
+        default=False, description="Whether bank statement was successfully parsed"
     )
-    detected_payroll_day: Optional[int] = Field(
-        default=None, description="Detected payroll day (1-31)"
+    salary_verified: bool = Field(
+        default=False, description="Whether salary deposits were detected"
     )
-    detected_patterns: list[str] = Field(
-        default_factory=list, description="Risk patterns detected (FIN-01, FIN-02, etc.)"
+    detected_salary_amount: Optional[Decimal] = Field(
+        default=None, description="Detected salary amount from deposits"
+    )
+
+    # Financial metrics
+    total_monthly_credits: Decimal = Field(
+        default=Decimal("0"), description="Total credits in statement period"
+    )
+    total_monthly_debits: Decimal = Field(
+        default=Decimal("0"), description="Total debits in statement period"
+    )
+    average_balance: Decimal = Field(
+        default=Decimal("0"), description="Average account balance"
+    )
+
+    # Credit report data
+    credit_score: Optional[int] = Field(
+        default=None, description="Credit score from bureau (300-850)"
+    )
+
+    # Risk assessment
+    risk_flags: list[str] = Field(
+        default_factory=list,
+        description="Risk flags from pattern detection (FIN-01 to FIN-05)"
+    )
+    financial_behavior_score: int = Field(
+        default=50,
+        description="Financial behavior score (0-100)",
+        ge=0,
+        le=100
     )
 
 

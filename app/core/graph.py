@@ -91,20 +91,31 @@ def create_graph() -> StateGraph:
 
 async def get_compiled_graph():
     """
-    Get compiled graph with checkpointing.
+    Get compiled graph with PostgreSQL checkpointing.
 
-    Phase 1: Uses in-memory checkpointing for testing.
-    Future: Will use PostgreSQL checkpointer (langgraph-checkpoint-postgres package).
+    Uses langgraph-checkpoint-postgres for persistent state management.
+    Benefits:
+    - Resume workflows after crashes/restarts
+    - Time-travel debugging (view state at any point)
+    - Complete audit trail of all state changes
+    - Thread-safe concurrent execution
 
     Returns:
-        Compiled graph
+        Compiled graph with PostgreSQL checkpointer
     """
+    from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+
     graph = create_graph()
 
-    # Phase 1: Compile without persistent checkpointing
-    # TODO: Add PostgreSQL checkpointer in Phase 2
-    # Requires: uv add langgraph-checkpoint-postgres
-    return graph.compile()
+    # Get PostgreSQL connection string from settings
+    db_url = settings.database.url
+
+    # Create checkpointer and setup tables
+    checkpointer = AsyncPostgresSaver.from_conn_string(db_url)
+    await checkpointer.setup()
+
+    # Compile graph with persistent checkpointing
+    return graph.compile(checkpointer=checkpointer)
 
 
 # For synchronous access (if needed)

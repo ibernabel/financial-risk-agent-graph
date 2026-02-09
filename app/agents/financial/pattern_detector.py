@@ -43,8 +43,8 @@ class PatternDetector:
 
         # Check each day for large credits followed by large debits
         for date_str, day_txns in txns_by_date.items():
-            credits = [t for t in day_txns if t.type == "CREDIT"]
-            debits = [t for t in day_txns if t.type == "DEBIT"]
+            credits = [t for t in day_txns if t.transaction_type == "CREDIT"]
+            debits = [t for t in day_txns if t.transaction_type == "DEBIT"]
 
             for credit in credits:
                 # Check if this looks like a salary (>= 10,000 DOP)
@@ -88,7 +88,7 @@ class PatternDetector:
         Risk Level: CRITICAL
         """
         # Filter debits (transfers out)
-        debits = [t for t in transactions if t.type == "DEBIT"]
+        debits = [t for t in transactions if t.transaction_type == "DEBIT"]
 
         # Group by similar descriptions and round amounts
         transfer_groups: dict[tuple[str, Decimal],

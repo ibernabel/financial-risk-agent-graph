@@ -39,7 +39,7 @@ class PatternDetector:
         # Group transactions by date
         txns_by_date: dict[str, list[Transaction]] = defaultdict(list)
         for txn in transactions:
-            txns_by_date[txn.date.isoformat()].append(txn)
+            txns_by_date[txn.txn_date.isoformat()].append(txn)
 
         # Check each day for large credits followed by large debits
         for date_str, day_txns in txns_by_date.items():
@@ -53,10 +53,10 @@ class PatternDetector:
 
                 # Sum debits within 24h
                 withdrawal_total = Decimal("0")
-                credit_date = credit.date
+                credit_date = credit.txn_date
 
                 for debit in debits:
-                    if abs((debit.date - credit_date).days) <= 1:
+                    if abs((debit.txn_date - credit_date).days) <= 1:
                         withdrawal_total += abs(debit.amount)
 
                 # Check if >90% withdrawn

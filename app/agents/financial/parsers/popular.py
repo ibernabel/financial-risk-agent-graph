@@ -42,8 +42,11 @@ async def parse_popular_statement(pdf_path: str) -> BankStatementData:
     """
     Parse Banco Popular bank statement.
 
+    Automatically detects CSV files and uses fast CSV parsing when available.
+    Falls back to PDF OCR if no CSV file is found.
+
     Args:
-        pdf_path: Path to Popular bank statement PDF
+        pdf_path: Path to Popular bank statement (PDF or CSV)
 
     Returns:
         Structured bank statement data
@@ -56,6 +59,21 @@ async def parse_popular_statement(pdf_path: str) -> BankStatementData:
         >>> print(f"Account: {data.account_number}")
         >>> print(f"Transactions: {len(data.transactions)}")
     """
+    from pathlib import Path
+
+    # Check if a CSV file exists in the same location
+    file_path = Path(pdf_path)
+    csv_path = file_path.with_suffix('.csv')
+
+    # If CSV exists, use fast CSV parsing
+    if csv_path.exists():
+        print(f"✨ Found CSV file, using fast parsing: {csv_path.name}")
+        from app.agents.financial.parsers.csv_parser import parse_popular_csv
+        return parse_popular_csv(str(csv_path))
+
+    # Fall back to PDF OCR
+    print(f"📄 No CSV found, using PDF OCR: {file_path.name}")
+
     # Extract data using OCR
     statement_data = await extract_document_data(
         pdf_path=pdf_path,

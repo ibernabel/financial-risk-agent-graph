@@ -50,9 +50,10 @@ async def extract_document_data(
     """
     # Initialize LLM with structured output
     llm = ChatOpenAI(
-        model=settings.ocr_llm_model,
-        temperature=settings.ocr_temperature,
-        max_tokens=settings.ocr_max_tokens,
+        api_key=settings.llm.openai_api_key,
+        model=settings.llm.ocr_llm_model,
+        temperature=settings.llm.ocr_temperature,
+        max_tokens=settings.llm.ocr_max_tokens,
     )
     llm_with_structure = llm.with_structured_output(response_schema)
 

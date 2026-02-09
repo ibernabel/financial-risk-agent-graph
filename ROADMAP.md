@@ -18,9 +18,9 @@
 
 **Documentation:** [`docs/implementation/phase-1-foundation.md`](file:///home/ibernabel/develop/aisa/financial-risk-agent-graph/docs/implementation/phase-1-foundation.md)
 
-## Phase 2A: Core Analysis Engines ✅ **COMPLETED** (Feb 8, 2026)
+## Phase 2A: Core Analysis Engines ✅ **COMPLETED** (Feb 8-9, 2026)
 
-**Status:** Triage Agent, Bank Parsers, and Pattern Detection implemented (70% of Phase 2)
+**Status:** Triage Agent, Bank Parsers, Pattern Detection, and CSV Fallback implemented
 
 **Completed:**
 
@@ -28,13 +28,14 @@
 - [x] Minimum wage tool and company size classification
 - [x] OCR tool using GPT-4o-mini for structured extraction
 - [x] Bank Statement Parsers for 3 priority banks (BHD, Popular, Banreservas)
+- [x] **CSV Fallback Implementation** - Automatic CSV detection with instant parsing
 - [x] Transaction extraction with account masking
 - [x] Salary deposit detection algorithm
 - [x] Payroll day identification
 - [x] Financial Pattern Detection (FIN-01 to FIN-05):
   - Fast Withdrawal pattern detection
   - Informal Lender detection
-  - NSF/Overdraft counting
+  - NSF/Overdraft counting (NSF = Non-Sufficient Funds)
   - Salary inconsistency check
   - Hidden accounts detection
 - [x] Comprehensive unit tests (37 tests, 100% pass rate)

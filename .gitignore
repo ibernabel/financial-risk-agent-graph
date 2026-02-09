@@ -74,3 +74,6 @@ session_track.csv
 creditflow_context/
 .agent/
 .agents/
+
+COMMIT*.md
+COMMIT*.txt

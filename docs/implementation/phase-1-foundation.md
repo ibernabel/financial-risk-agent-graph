@@ -238,9 +238,8 @@ tests/test_config.py::test_api_settings PASSED                           [100%]
 
 ### Python Version
 
-- **Current:** Python 3.14 (via virtual environment)
-- **Recommended:** Python 3.12 for production (per PRD)
-- **Note:** Minor Pydantic V1 compatibility warning with 3.14 (non-blocking)
+- **Current:** Python 3.12.7 (Pinned via `.python-version`)
+- **Note:** Python 3.14 was found to be incompatible with Pydantic V1 legacy code used in LangChain/LangGraph.
 
 ---
 

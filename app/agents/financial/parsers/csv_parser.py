@@ -147,35 +147,43 @@ def parse_popular_csv(csv_path: str) -> BankStatementData:
                 break
 
         # Parse transactions
+        # CSV Format: Fecha Posteo, Descripción Corta, Monto Transacción, Balance, No. Referencia, No. Serial, Descripción
         reader = csv.reader(lines[data_start_idx:])
         for row in reader:
-            if len(row) >= 5:
+            if len(row) >= 4:
                 try:
                     fecha = row[0].strip()
-                    descripcion = row[1].strip()
-                    debito = row[2].strip()
-                    credito = row[3].strip()
-                    balance = row[4].strip()
+                    # Type indicator (Crédito/Débito)
+                    descripcion_corta = row[1].strip()
+                    monto = row[2].strip()  # Transaction amount
+                    balance = row[3].strip()  # Balance after transaction
+                    # Full description in row[6] if available
+                    descripcion_full = row[6].strip() if len(
+                        row) > 6 else descripcion_corta
 
-                    if fecha and descripcion:
+                    if fecha and descripcion_corta and monto:
                         # Parse date
                         txn_date = datetime.strptime(fecha, '%d/%m/%Y').date()
 
-                        # Determine type and amount
-                        if credito and credito not in ('', '0', '0.00'):
+                        # Determine transaction type from Descripción Corta
+                        if "Crédito" in descripcion_corta or "crédito" in descripcion_corta:
                             tx_type = "CREDIT"
-                            amount = Decimal(credito.replace(',', ''))
-                        else:
+                        elif "Débito" in descripcion_corta or "débito" in descripcion_corta:
                             tx_type = "DEBIT"
-                            amount = Decimal(debito.replace(',', '')) if debito and debito not in (
-                                '', '0') else Decimal('0')
+                        else:
+                            # Fallback: treat as debit if we can't determine
+                            tx_type = "DEBIT"
 
+                        # Parse amount (always positive in CSV)
+                        amount = Decimal(monto.replace(',', ''))
+
+                        # Parse balance
                         balance_decimal = Decimal(balance.replace(
                             ',', '')) if balance else Decimal('0')
 
                         transaction = Transaction(
                             txn_date=txn_date,
-                            description=descripcion,
+                            description=descripcion_full,  # Use full description
                             amount=amount,
                             transaction_type=tx_type,
                             balance=balance_decimal,

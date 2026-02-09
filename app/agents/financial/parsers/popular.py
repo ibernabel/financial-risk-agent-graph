@@ -22,15 +22,21 @@ Extract ALL transactions from this bank statement PDF.
 2. Statement period (start and end dates)
 3. All transactions with:
    - Date (YYYY-MM-DD format)
-   - Description (as shown on statement)
-   - Amount (positive for credits, negative for debits)
-   - Type (CREDIT or DEBIT)
+   - Description (from 'Descripción' or 'Descripción Corta' column)
+   - Amount (extract from 'Monto' column, store as positive decimal number)
+   - Type (CREDIT or DEBIT):
+     * CREDIT: Amount has NO minus sign at the end (e.g., "RD$ 490.00")
+     * DEBIT: Amount has minus sign at the END (e.g., "RD$ 514.40-")
    - Balance after transaction
 
 **Important:**
 - Extract EVERY transaction, do not skip any
+- Extract transaction amount from the 'Monto' or 'Monto Transacción' column
+- Determine transaction type by checking if the amount string ends with '-':
+  - If amount ends with '-' → DEBIT transaction
+  - If amount has no '-' suffix → CREDIT transaction
+- Store amounts as POSITIVE decimal numbers (remove '-', currency symbols, and commas)
 - Preserve exact descriptions from the statement
-- Use negative amounts for debits
 - Account number must be masked (show only last 4 digits)
 
 **Output Format:**

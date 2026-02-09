@@ -126,6 +126,52 @@ All bank parsers now automatically detect and use CSV files when available, fall
 - ✅ 100% accuracy (direct data reading)
 - ✅ Backward compatible (PDF OCR still works)
 
+#### Popular Bank Parser Bug Fix
+
+**Fixed:** February 9, 2026
+
+> [!IMPORTANT]
+> Critical bug fix for Popular Bank CSV and PDF parsing logic
+
+**Issue:** Popular Bank uses a single-column format for transaction amounts (unlike other banks with separate debit/credit columns). The parser was incorrectly mapping CSV columns, using balance values instead of actual transaction amounts.
+
+**Root Cause:**
+
+- CSV parser used `row[2]` as "debito" and `row[3]` as "credito"
+- Actually reading from wrong columns (balance and reference number)
+- Transaction types not determined from "Descripción Corta" column
+
+**Fix Applied:**
+
+**CSV Parser** ([`csv_parser.py`](file:///home/ibernabel/develop/aisa/financial-risk-agent-graph/app/agents/financial/parsers/csv_parser.py)):
+
+```python
+# Correct column mapping for Popular Bank CSV:
+# Fecha Posteo, Descripción Corta, Monto Transacción, Balance, ...
+monto = row[2].strip()              # Transaction amount
+descripcion_corta = row[1].strip()  # Type indicator (Crédito/Débito)
+
+# Determine type from Descripción Corta
+if "Crédito" in descripcion_corta:
+    tx_type = "CREDIT"
+elif "Débito" in descripcion_corta:
+    tx_type = "DEBIT"
+```
+
+**PDF Parser** ([`popular.py`](file:///home/ibernabel/develop/aisa/financial-risk-agent-graph/app/agents/financial/parsers/popular.py)):
+
+- Updated OCR prompt to extract amounts from 'Monto' column
+- Specified CREDIT/DEBIT determination by '-' suffix:
+  - CREDIT: "RD$ 490.00" (no minus sign)
+  - DEBIT: "RD$ 514.40-" (minus sign at end)
+
+**Verification:**
+
+- ✅ Transaction amounts now match CSV "Monto Transacción" column
+- ✅ Transaction types correctly determined from "Descripción Corta"
+- ✅ Pattern detection produces accurate results
+- ✅ Salary detection works with real transaction amounts
+
 #### Configuration
 
 Added to [`app/core/config.py`](file:///home/ibernabel/develop/aisa/financial-risk-agent-graph/app/core/config.py):

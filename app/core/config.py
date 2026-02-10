@@ -132,6 +132,12 @@ class ExternalServicesSettings(BaseSettings):
 
     # SerpAPI for OSINT
     serpapi_key: str = Field(default="", description="SerpAPI key")
+    serpapi_rate_limit: int = Field(
+        default=10, description="SerpAPI requests per minute"
+    )
+    serpapi_timeout: int = Field(
+        default=30, description="SerpAPI request timeout in seconds"
+    )
 
     # Credit Parser API
     credit_parser_url: str = Field(

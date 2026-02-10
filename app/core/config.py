@@ -139,6 +139,11 @@ class ExternalServicesSettings(BaseSettings):
         default=30, description="SerpAPI request timeout in seconds"
     )
 
+    # Redis for caching
+    redis_host: str = Field(default="localhost", description="Redis host")
+    redis_port: int = Field(default=6379, description="Redis port")
+    redis_password: str = Field(default="", description="Redis password")
+
     # Credit Parser API
     credit_parser_url: str = Field(
         default="http://localhost:8001/v1/parse", description="Credit parser API URL"
@@ -193,6 +198,12 @@ class FeatureFlags(BaseSettings):
 
     enable_osint: bool = Field(
         default=True, description="Enable OSINT research")
+    enable_osint_cache: bool = Field(
+        default=False, description="Enable Redis caching for OSINT results"
+    )
+    enable_osint_metrics: bool = Field(
+        default=True, description="Enable OSINT metrics collection"
+    )
     enable_checkpointing: bool = Field(
         default=True, description="Enable checkpointing")
     enable_human_review: bool = Field(

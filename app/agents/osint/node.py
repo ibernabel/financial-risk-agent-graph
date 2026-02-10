@@ -2,14 +2,22 @@
 OSINT Researcher Agent Node - Business validation using open-source intelligence.
 
 Validates informal businesses using Google Maps, Instagram, and Facebook.
+Includes caching and metrics collection for production use.
 """
 
 import asyncio
+import logging
+from time import time
 from app.core.state import AgentState, OSINTFindings
+from app.core.config import settings
 from app.tools.serpapi_client import SerpAPIClient
 from app.tools.instagram_scraper import InstagramScraper
 from app.tools.facebook_scraper import FacebookScraper
 from app.agents.osint.dvs_calculator import DVSCalculator
+from app.tools.osint_cache import osint_cache
+from app.tools.osint_metrics import osint_metrics, OSINTSource
+
+logger = logging.getLogger(__name__)
 
 
 async def osint_researcher_node(state: AgentState) -> dict:
@@ -61,11 +69,24 @@ async def osint_researcher_node(state: AgentState) -> dict:
             "agents_executed": state.agents_executed + ["osint_researcher"],
         }
 
+    # Check cache first (if enabled)
+    if settings.features.enable_osint_cache:
+        cached_result = await osint_cache.get(business_name, business_address)
+        if cached_result:
+            logger.info(f"OSINT cache HIT for {business_name}")
+            return {
+                "osint_findings": OSINTFindings(**cached_result),
+                "current_step": "osint_completed",
+                "agents_executed": state.agents_executed + ["osint_researcher"],
+            }
+
+    # Start timing for metrics
+    start_time = time()
+
     # Initialize tools
     serpapi_client = SerpAPIClient()
     instagram_scraper = InstagramScraper()
     facebook_scraper = FacebookScraper()
-    dvs_calculator = DVSCalculator()
 
     # Run searches in parallel
     try:
@@ -133,6 +154,44 @@ async def osint_researcher_node(state: AgentState) -> dict:
             sources_checked=dvs_result.sources_checked,
             evidence=evidence,
         )
+
+        # Record metrics (if enabled)
+        if settings.features.enable_osint_metrics:
+            total_latency = int((time() - start_time) * 1000)  # Convert to ms
+
+            # Record per-source metrics
+            if google_maps_result and not isinstance(google_maps_result, Exception):
+                osint_metrics.record(
+                    business_name=business_name,
+                    source=OSINTSource.GOOGLE_MAPS,
+                    success=google_maps_result.found,
+                    latency_ms=total_latency // 3,  # Approximate
+                    dvs_score=dvs_result.score,
+                )
+
+            if instagram_result and not isinstance(instagram_result, Exception):
+                osint_metrics.record(
+                    business_name=business_name,
+                    source=OSINTSource.INSTAGRAM,
+                    success=instagram_result.found,
+                    latency_ms=total_latency // 3,
+                    dvs_score=dvs_result.score,
+                )
+
+            if facebook_result and not isinstance(facebook_result, Exception):
+                osint_metrics.record(
+                    business_name=business_name,
+                    source=OSINTSource.FACEBOOK,
+                    success=facebook_result.found,
+                    latency_ms=total_latency // 3,
+                    dvs_score=dvs_result.score,
+                )
+
+        # Cache result (if enabled)
+        if settings.features.enable_osint_cache:
+            await osint_cache.set(
+                business_name, business_address, osint_findings.model_dump()
+            )
 
         return {
             "osint_findings": osint_findings,

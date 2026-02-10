@@ -195,6 +195,33 @@ OSINT findings feed into:
 
 ## Known Limitations & Mitigation
 
+### 0. **CRITICAL: State Access Issue** ✅ **FIXED**
+
+**Issue**: OSINT agent initially accessed `business_name` and `business_address` from `state.triage_result`, but these fields don't exist in the `TriageResult` Pydantic model.
+
+**Fix Applied** (`app/agents/osint/node.py:45-60`):
+
+```python
+# Extract business information from applicant
+# For informal businesses, declared_employer is the business name
+business_name = state.applicant.get("declared_employer", "")
+business_address = state.applicant.get("declared_address", "")
+
+# If no business name, cannot perform OSINT
+if not business_name:
+    return {
+        "osint_findings": OSINTFindings(
+            business_found=False,
+            digital_veracity_score=0.0,
+            sources_checked=[],
+            evidence={"error": "No business name provided in applicant data"},
+        ),
+        ...
+    }
+```
+
+**Validation**: Manual testing confirmed fix works correctly with real business data.
+
 ### 1. Scraping Stability
 
 **Issue**: Instagram/Facebook may change HTML structure

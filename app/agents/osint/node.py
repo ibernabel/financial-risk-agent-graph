@@ -42,8 +42,24 @@ async def osint_researcher_node(state: AgentState) -> dict:
             "agents_executed": state.agents_executed + ["osint_researcher"],
         }
 
-    business_name = state.triage_result.business_name
-    business_address = state.triage_result.business_address or ""
+    # Extract business information from applicant
+    # For informal businesses, declared_employer is the business name
+    business_name = state.applicant.get("declared_employer", "")
+    business_address = state.applicant.get("declared_address", "")
+
+    # If no business name, cannot perform OSINT
+    if not business_name:
+        return {
+            "osint_findings": OSINTFindings(
+                business_found=False,
+                digital_veracity_score=0.0,
+                sources_checked=[],
+                evidence={
+                    "error": "No business name provided in applicant data"},
+            ),
+            "current_step": "osint_completed",
+            "agents_executed": state.agents_executed + ["osint_researcher"],
+        }
 
     # Initialize tools
     serpapi_client = SerpAPIClient()

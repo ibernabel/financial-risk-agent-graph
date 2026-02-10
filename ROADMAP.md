@@ -81,19 +81,23 @@
 
 ---
 
-## Phase 5: OSINT Research 🔄 **IN PROGRESS** (Week 7)
+## Phase 5: OSINT Research ✅ **COMPLETED** (Week 7, Feb 2026)
 
-**Status:** Not started
+**Status:** Implementation complete, pending manual validation
 
-**Tasks:**
+**Completed:**
 
-- [ ] 5.1 - Google Maps search integration (SerpAPI)
-- [ ] 5.2 - Instagram public profile scraper (Playwright)
-- [ ] 5.3 - Facebook business page search
-- [ ] 5.4 - Digital Veracity Score calculation
-- [ ] 5.5 - Rate limiting and error handling
+- [x] 5.1 - Google Maps search integration (SerpAPI)
+- [x] 5.2 - Instagram public profile scraper (Playwright)
+- [x] 5.3 - Facebook business page search
+- [x] 5.4 - Digital Veracity Score calculation
+- [x] 5.5 - Rate limiting and error handling
 
-**Exit Criteria:** 70% success rate validating informal businesses in test set.
+**Exit Criteria:** 70% success rate validating informal businesses in test set (pending manual validation).
+
+**Documentation:** [`docs/implementation/phase-5-osint.md`](file:///home/ibernabel/develop/aisa/financial-risk-agent-graph/docs/implementation/phase-5-osint.md)
+
+**Test Results:** 23/23 unit tests passing
 
 ---
 

@@ -22,7 +22,13 @@ class DatabaseSettings(BaseSettings):
     pool_timeout: int = Field(
         default=30, description="Pool timeout in seconds")
 
-    model_config = SettingsConfigDict(env_prefix="DATABASE_")
+    model_config = SettingsConfigDict(
+        env_prefix="DATABASE_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 class LLMSettings(BaseSettings):
@@ -66,7 +72,13 @@ class LLMSettings(BaseSettings):
     ocr_max_tokens: int = Field(
         default=4096, description="Max tokens for OCR responses")
 
-    model_config = SettingsConfigDict(env_prefix="")
+    model_config = SettingsConfigDict(
+        env_prefix="",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 class APISettings(BaseSettings):
@@ -106,7 +118,13 @@ class APISettings(BaseSettings):
         default=60, description="Requests per minute")
     rate_limit_burst: int = Field(default=10, description="Burst allowance")
 
-    model_config = SettingsConfigDict(env_prefix="API_")
+    model_config = SettingsConfigDict(
+        env_prefix="API_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 class ExternalServicesSettings(BaseSettings):
@@ -127,7 +145,13 @@ class ExternalServicesSettings(BaseSettings):
         default="https://calculo.mt.gob.do/", description="Labor calculator URL"
     )
 
-    model_config = SettingsConfigDict(env_prefix="")
+    model_config = SettingsConfigDict(
+        env_prefix="",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 class SecuritySettings(BaseSettings):
@@ -149,7 +173,13 @@ class SecuritySettings(BaseSettings):
     encryption_key: str = Field(
         default="", description="AES-256 encryption key")
 
-    model_config = SettingsConfigDict(env_prefix="")
+    model_config = SettingsConfigDict(
+        env_prefix="",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 class FeatureFlags(BaseSettings):
@@ -164,7 +194,13 @@ class FeatureFlags(BaseSettings):
     force_reanalysis: bool = Field(
         default=False, description="Force reanalysis")
 
-    model_config = SettingsConfigDict(env_prefix="")
+    model_config = SettingsConfigDict(
+        env_prefix="",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 class Settings(BaseSettings):

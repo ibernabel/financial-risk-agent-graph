@@ -51,6 +51,7 @@ class TransactionSummary(BaseModel):
 class BankStatementData(BaseModel):
     """Structured bank statement data."""
 
+    bank_name: str | None = Field(default=None, description="Bank name")
     account_number: str = Field(description="Account number (masked)")
     period_start: date = Field(description="Statement period start date")
     period_end: date = Field(description="Statement period end date")

@@ -17,27 +17,36 @@ You are a bank statement parser for Banco Popular (Dominican Republic).
 
 Extract ALL transactions from this bank statement PDF.
 
+**CRITICAL RULE - Transaction Type Classification:**
+The transaction type is determined ONLY by the minus sign at the end of the amount:
+- Amount ends with '-' (e.g., "RD$ 514.40-") → DEBIT
+- Amount has NO '-' at the end (e.g., "RD$ 490.00") → CREDIT
+
+DO NOT use the transaction description to determine the type. ONLY look at the minus sign.
+
 **Required Information:**
 1. Account number (mask all but last 4 digits, e.g., "****1234")
 2. Statement period (start and end dates)
 3. All transactions with:
    - Date (YYYY-MM-DD format)
-   - Description (from 'Descripción' or 'Descripción Corta' column)
-   - Amount (extract from 'Monto' column, store as positive decimal number)
-   - Type (CREDIT or DEBIT):
-     * CREDIT: Amount has NO minus sign at the end (e.g., "RD$ 490.00")
-     * DEBIT: Amount has minus sign at the END (e.g., "RD$ 514.40-")
-   - Balance after transaction
+   - Description (exact text from 'Comentarios' column)
+   - Amount (from 'Monto' column, extract as positive decimal number)
+   - Type (CREDIT or DEBIT - determined ONLY by minus sign as explained above)
+   - Balance (from 'Balance' column after transaction)
 
-**Important:**
-- Extract EVERY transaction, do not skip any
-- Extract transaction amount from the 'Monto' or 'Monto Transacción' column
-- Determine transaction type by checking if the amount string ends with '-':
-  - If amount ends with '-' → DEBIT transaction
-  - If amount has no '-' suffix → CREDIT transaction
-- Store amounts as POSITIVE decimal numbers (remove '-', currency symbols, and commas)
-- Preserve exact descriptions from the statement
+**Transaction Type Examples:**
+✅ "RD$ 1,154.25" (no minus) → CREDIT
+✅ "RD$ 1,197.46-" (minus at end) → DEBIT
+✅ "RD$ 490.00" (no minus) → CREDIT
+✅ "RD$ 90.00-" (minus at end) → DEBIT
+
+**Important Guidelines:**
+- Extract EVERY transaction from all pages, do not skip any
+- STRICTLY follow the minus sign rule for transaction type - ignore description keywords
+- Store amounts as POSITIVE decimal numbers (remove '-', currency symbols, commas)
+- Preserve exact descriptions from the 'Comentarios' column
 - Account number must be masked (show only last 4 digits)
+- Use the exact date from 'Fecha' column
 
 **Output Format:**
 Return structured JSON matching the BankStatementData schema.

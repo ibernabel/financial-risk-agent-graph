@@ -60,31 +60,56 @@ async def extract_document_data(
     # Prepare image content
     if pdf_path.startswith("http"):
         # URL-based image
-        image_content = {"type": "image_url", "image_url": {"url": pdf_path}}
+        image_content = [{"type": "image_url", "image_url": {"url": pdf_path}}]
     else:
-        # Local file - encode as base64
-        with open(pdf_path, "rb") as f:
-            image_data = base64.b64encode(f.read()).decode("utf-8")
+        # Local file - handle PDF conversion if needed
+        file_path = Path(pdf_path)
+        suffix = file_path.suffix.lower()
 
-        # Detect file type
-        suffix = Path(pdf_path).suffix.lower()
-        mime_type = {
-            ".pdf": "application/pdf",
-            ".png": "image/png",
-            ".jpg": "image/jpeg",
-            ".jpeg": "image/jpeg",
-        }.get(suffix, "application/pdf")
+        # OpenAI vision API requires image formats, not PDF
+        # Convert PDF to image if needed
+        if suffix == ".pdf":
+            from pdf2image import convert_from_path
+            import io
 
-        image_content = {
-            "type": "image_url",
-            "image_url": {"url": f"data:{mime_type};base64,{image_data}"},
-        }
+            # Convert ALL pages of PDF to images
+            images = convert_from_path(pdf_path)
 
-    # Create message with prompt and image
+            # Convert each page to base64 PNG and create image content
+            image_content = []
+            for page_num, image in enumerate(images, 1):
+                img_buffer = io.BytesIO()
+                image.save(img_buffer, format="PNG")
+                image_data = base64.b64encode(
+                    img_buffer.getvalue()).decode("utf-8")
+
+                image_content.append({
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/png;base64,{image_data}"},
+                })
+
+            print(f"📄 Converted {len(images)} PDF page(s) to images for OCR")
+        else:
+            # For image files, read directly
+            with open(pdf_path, "rb") as f:
+                image_data = base64.b64encode(f.read()).decode("utf-8")
+
+            mime_type = {
+                ".png": "image/png",
+                ".jpg": "image/jpeg",
+                ".jpeg": "image/jpeg",
+            }.get(suffix, "image/png")
+
+            image_content = [{
+                "type": "image_url",
+                "image_url": {"url": f"data:{mime_type};base64,{image_data}"},
+            }]
+
+    # Create message with prompt and all images
     message = HumanMessage(
         content=[
             {"type": "text", "text": extraction_prompt},
-            image_content,
+            *image_content,  # Unpack all image content items
         ]
     )
 

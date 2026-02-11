@@ -99,6 +99,11 @@
 
 **Test Results:** 23/23 unit tests passing
 
+**Known Limitations:**
+
+- ⚠️ Instagram search has low accuracy (~30%) due to Google search fallback
+- See improvement plan: [`docs/decisions/instagram-search-improvement.md`](file:///home/ibernabel/develop/aisa/financial-risk-agent-graph/docs/decisions/instagram-search-improvement.md)
+
 ---
 
 ## Phase 6: IRS Engine (Week 8)

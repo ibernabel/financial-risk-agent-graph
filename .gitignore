@@ -77,3 +77,7 @@ creditflow_context/
 
 COMMIT*.md
 COMMIT*.txt
+
+# some test files
+tests/test_deiquel_search.py
+tests/test_solufime_search.py

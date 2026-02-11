@@ -97,17 +97,28 @@ class SerpAPIClient:
             )
 
     async def search_google_maps(
-        self, business_name: str, address: str
+        self,
+        business_name: str,
+        address: str,
+        expected_phone: Optional[str] = None,
     ) -> GoogleMapsResult:
         """
-        Search Google Maps for business location.
+        Search Google Maps for business location with multi-signal validation.
+
+        Uses smart query strategy:
+        1. Try business_name + city (extracted from address)
+        2. Try business_name + full address
+        3. Try business_name only
+
+        Then rank results by relevance.
 
         Args:
             business_name: Name of the business to search
             address: Business address for context
+            expected_phone: Optional phone number for validation
 
         Returns:
-            GoogleMapsResult with business information
+            GoogleMapsResult with best matching business
 
         Raises:
             Exception: If API call fails
@@ -115,55 +126,200 @@ class SerpAPIClient:
         await self.rate_limiter.acquire()
 
         try:
-            # Build search query
-            query = f"{business_name} {address}"
+            # Import text utils
+            from app.utils.text_utils import extract_address_components
 
-            # Execute search using SerpAPI
-            search = GoogleSearch(
-                {
+            # Extract city/municipality from address for better query
+            address_parts = extract_address_components(address)
+            city_query = address_parts.municipality or address_parts.city
+
+            # Dominican Republic coordinates (Santo Domingo center)
+            # This helps SerpAPI prioritize Dominican businesses
+            dr_location = "@18.4861,-69.9312,14z"
+
+            # Build query variations:
+            # 1. Exact match with quotes (most precise)
+            # 2. Fuzzy match with city
+            # 3. Fuzzy match with full address
+            query_variations = [
+                # Exact match + DR location
+                (f'"{business_name}"', dr_location),
+            ]
+
+            if city_query:
+                query_variations.append(
+                    (f"{business_name} {city_query}", dr_location))
+
+            query_variations.append((f"{business_name} {address}", None))
+            query_variations.append((business_name, dr_location))
+
+            # Try each query until we get results
+            all_results = []
+            for query, location in query_variations:
+                # Build search params
+                # Use Google Maps engine with type=search
+                # This returns place_results for exact matches
+                search_params = {
                     "q": query,
                     "engine": "google_maps",
-                    "api_key": self.api_key,
                     "type": "search",
+                    "api_key": self.api_key,
                 }
-            )
 
-            # Get results (synchronous call, run in executor)
-            loop = asyncio.get_event_loop()
-            results = await loop.run_in_executor(None, search.get_dict)
+                # Add location if specified (coordinates work better than text)
+                if location:
+                    search_params["ll"] = location
 
-            # Parse local results
-            local_results = results.get("local_results", [])
+                # Execute search using SerpAPI
+                search = GoogleSearch(search_params)
 
-            if not local_results:
+                # Get results (synchronous call, run in executor)
+                loop = asyncio.get_event_loop()
+                results = await loop.run_in_executor(None, search.get_dict)
+
+                # Check place_results first (exact match from type=search)
+                place_result = results.get("place_results", {})
+                if place_result and place_result.get("title"):
+                    # Extract type (can be a list)
+                    business_type = place_result.get("type")
+                    if isinstance(business_type, list) and business_type:
+                        business_type = business_type[0]
+
+                    all_results.append({
+                        "title": place_result.get("title"),
+                        "address": place_result.get("address"),
+                        "phone": place_result.get("phone"),
+                        "rating": place_result.get("rating"),
+                        "reviews": place_result.get("reviews"),
+                        "website": place_result.get("website"),
+                        "place_id": place_result.get("place_id"),
+                        "type": business_type,
+                    })
+                    break  # Found exact match, stop searching
+
+                # Fallback to local_results
+                local_results = results.get("local_results", [])
+                if local_results:
+                    all_results.extend(local_results[:3])
+                    break  # Found results, stop searching
+
+            if not all_results:
                 return GoogleMapsResult(found=False)
 
-            # Get first result (most relevant)
-            first_result = local_results[0]
+            # Remove duplicates (by place_id)
+            seen_place_ids = set()
+            unique_results = []
+            for result in all_results:
+                place_id = result.get("place_id")
+                if place_id and place_id not in seen_place_ids:
+                    seen_place_ids.add(place_id)
+                    unique_results.append(result)
+                elif not place_id:  # No place_id, keep it
+                    unique_results.append(result)
 
-            # Calculate address match score (simple fuzzy match)
-            result_address = first_result.get("address", "").lower()
-            query_address = address.lower()
-            address_match = self._calculate_address_match(
-                result_address, query_address
+            # Rank results by relevance
+            ranked_results = self._rank_google_maps_results(
+                unique_results,
+                business_name,
+                address,
+                expected_phone,
+            )
+
+            if not ranked_results:
+                return GoogleMapsResult(found=False)
+
+            # Get best match
+            best_result, relevance_score = ranked_results[0]
+
+            # Calculate address match score
+            from app.utils.text_utils import validate_address_match
+
+            _, address_score = validate_address_match(
+                best_result.get("address", ""), address
             )
 
             return GoogleMapsResult(
                 found=True,
-                place_id=first_result.get("place_id"),
-                rating=first_result.get("rating"),
-                reviews_count=first_result.get("reviews", 0),
-                address=first_result.get("address"),
-                address_match_score=address_match,
-                phone=first_result.get("phone"),
-                website=first_result.get("website"),
-                business_type=first_result.get("type"),
+                place_id=best_result.get("place_id"),
+                rating=best_result.get("rating"),
+                reviews_count=best_result.get("reviews", 0),
+                address=best_result.get("address"),
+                address_match_score=address_score,
+                phone=best_result.get("phone"),
+                website=best_result.get("website"),
+                business_type=best_result.get("type"),
             )
 
         except Exception as e:
             # Log error and return not found
             print(f"SerpAPI Google Maps search failed: {e}")
             return GoogleMapsResult(found=False)
+
+    def _rank_google_maps_results(
+        self,
+        results: list[dict],
+        business_name: str,
+        business_address: str,
+        expected_phone: Optional[str] = None,
+    ) -> list[tuple[dict, float]]:
+        """
+        Rank Google Maps results by relevance.
+
+        Scoring factors:
+        - Name similarity (40%)
+        - Address match (40%)
+        - Phone match (20%) if available
+
+        Args:
+            results: List of Google Maps results
+            business_name: Expected business name
+            business_address: Expected business address
+            expected_phone: Optional expected phone number
+
+        Returns:
+            List of (result, score) tuples sorted by score descending
+        """
+        from app.utils.text_utils import (
+            fuzzy_match,
+            validate_address_match,
+            validate_phone_match,
+        )
+
+        ranked = []
+
+        for result in results:
+            scores = {}
+
+            # Name similarity (40%)
+            result_title = result.get("title", "")
+            scores["name"] = fuzzy_match(result_title, business_name)
+
+            # Address match (40%)
+            result_address = result.get("address", "")
+            _, scores["address"] = validate_address_match(
+                result_address, business_address
+            )
+
+            # Phone match (20%) if available
+            if expected_phone:
+                result_phone = result.get("phone")
+                _, scores["phone"] = validate_phone_match(
+                    result_phone, expected_phone
+                )
+            else:
+                scores["phone"] = 0.0
+
+            # Calculate weighted score
+            total_score = (
+                scores["name"] * 0.4
+                + scores["address"] * 0.4
+                + scores["phone"] * 0.2
+            )
+
+            ranked.append((result, total_score))
+
+        # Sort by score descending
+        return sorted(ranked, key=lambda x: x[1], reverse=True)
 
     async def search_web(
         self, query: str, num_results: int = 10

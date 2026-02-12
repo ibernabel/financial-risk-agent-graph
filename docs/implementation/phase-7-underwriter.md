@@ -111,6 +111,27 @@ confidence = max(confidence, 0.30)  # Apply floor
 language = state.config.get("narrative_language", "es")
 ```
 
+**Example Output (Spanish):**
+
+```
+✅ **APROBADO**
+**IRS Score:** 90/100 (Nivel de Riesgo: BAJO)
+**Confianza:** 91.5%
+
+## Hallazgos Clave
+
+**Historial Crediticio:** Perfil sólido con buen historial crediticio.
+
+**Salario Detectado:** RD$40,000.00/mes
+**Score de Buró:** 780
+
+## Recomendación
+
+El solicitante presenta un perfil de riesgo BAJO con IRS de 90 puntos.
+Se recomienda **APROBAR** el préstamo según los términos solicitados.
+Confianza del análisis: 91.5%.
+```
+
 ---
 
 ### 4. Production Underwriter Node
@@ -157,6 +178,20 @@ payment_capacity -= (dependents × 2,000 DOP)  # Adjust for dependents
 | Confidence Calculation | 5     | Perfect data, missing data, salary mismatch, floor, OSINT skip                  |
 | Full Integration       | 4     | End-to-end workflows with all agents                                            |
 | Edge Cases             | 4     | Partial workflow, zero IRS, rejected, missing financial                         |
+
+### Decision Matrix Test Scenarios
+
+All decision paths validated with boundary and edge cases:
+
+| Scenario                   | IRS | Confidence | Amount | Expected Decision       | Test Result |
+| -------------------------- | --- | ---------- | ------ | ----------------------- | ----------- |
+| Perfect Profile            | 90  | 0.90       | 40K    | APPROVED                | ✅ Pass     |
+| High Score, Low Confidence | 90  | 0.70       | 40K    | APPROVED_PENDING_REVIEW | ✅ Pass     |
+| Medium Risk                | 75  | 0.85       | 30K    | MANUAL_REVIEW           | ✅ Pass     |
+| Low Score                  | 50  | 0.90       | 20K    | REJECTED                | ✅ Pass     |
+| High Amount Override       | 95  | 0.95       | 75K    | MANUAL_REVIEW           | ✅ Pass     |
+| Boundary IRS=85            | 85  | 0.85       | 40K    | APPROVED                | ✅ Pass     |
+| Boundary IRS=60            | 60  | 0.84       | 30K    | MANUAL_REVIEW           | ✅ Pass     |
 
 ---
 

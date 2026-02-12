@@ -214,18 +214,54 @@ Implemented language parameter for narrative generation to support both Spanish 
 
 1. `app/agents/irs_engine/node.py` - Replaced stub with real implementation
 
-## Verification
+## Verification Scenarios
 
 ### Scenario 1: Ideal Applicant
 
-- Credit: 800, Salary: RD$60K, Employment: 5 years, Assets: Yes
-- **Result**: Score 95/100, Risk: LOW, Recommendation: APPROVE
+**Profile:**
+
+- Credit score: 800
+- Salary: RD$60,000/month
+- Employment: 5 years
+- Loan: RD$50,000 over 24 months
+- Assets: Has vehicle
+- Severance: RD$300,000
+
+**Result:**
+
+- **Score**: 95/100
+- **Risk Level**: LOW
+- **Deductions**: Minimal (0-2 minor deductions)
+- **Recommendation**: APPROVE
 
 ### Scenario 2: Risky Applicant
 
-- Credit: 550, Salary: RD$22K, Employment: 2 months, Dependents: 4, No assets
+**Profile:**
+
+- Credit score: 550
+- Salary: RD$22,000/month
+- Employment: 2 months (probation)
+- Loan: RD$75,000 over 12 months
+- Dependents: 4
+- No assets
 - Risk flags: Fast withdrawal + Informal lender
-- **Result**: Score 35/100, Risk: CRITICAL, Recommendation: REJECT
+- Severance: RD$5,000
+
+**Result:**
+
+- **Score**: 35/100
+- **Risk Level**: CRITICAL
+- **Deductions**: 7+ deductions totaling 65+ points
+  - Poor credit: -15
+  - Critical cash flow: -20
+  - Low income: -5
+  - High dependency: -10
+  - Probation period: -10
+  - No assets: -3
+  - Insufficient severance: -5
+  - Fast withdrawal: -5
+  - Informal lender: -15
+- **Recommendation**: REJECT
 
 ## Deployment Notes
 

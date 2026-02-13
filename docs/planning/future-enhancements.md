@@ -224,49 +224,6 @@ def generate_narrative(state, decision, product_type="PERSONAL_LOAN"):
 
 ---
 
-### 2.2 Additional Language Support (Haitian Creole)
-
-**Current State:** Spanish and English only  
-**Target State:** Add Haitian Creole for DR market
-
-**Motivation:**
-
-- Dominican Republic has large Haitian population
-- Improve accessibility for Haitian applicants
-
-**Implementation:**
-
-**Add Creole Templates:**
-
-```python
-# app/agents/underwriter/narrative.py
-NARRATIVES_HT = {
-    "decision_header": {
-        "APPROVED": "✅ **APWOUVE**",
-        "REJECTED": "❌ **REJTE**",
-        # ... etc
-    }
-}
-```
-
-**Translation Service:**
-
-```python
-# Use Google Translate API for fallback
-from google.cloud import translate_v2
-
-def translate_narrative(narrative: str, target_lang: str) -> str:
-    if target_lang not in ["es", "en", "ht"]:
-        return narrative  # Default to original
-    # ... translation logic
-```
-
-**Timeline:** 1 week (templates) + ongoing (translations)  
-**Dependencies:** Translation service integration  
-**Owner:** i18n Lead
-
----
-
 ## Priority 3: Advanced Features (Q4 2026)
 
 ### 3.1 Machine Learning Model for IRS Score Prediction
@@ -358,50 +315,7 @@ else:
 **Dependencies:** DataCrédito API access, contract  
 **Owner:** Backend Dev + Integrations Lead
 
----
-
-### 3.3 Explainability Dashboard for Analysts
-
-**Current State:** Narrative in text format  
-**Target State:** Interactive dashboard with drill-down
-
-**Motivation:**
-
-- Analysts want to see _why_ each factor contributed to decision
-- Visual explanations improve trust
-
-**Proposed UI:**
-
-**Dashboard Sections:**
-
-1. **Decision Summary Card**
-   - Decision, IRS Score, Confidence
-   - Risk level gauge
-
-2. **Confidence Breakdown (Visual)**
-   - Pie chart: 5 confidence factors with scores
-   - Clickable to see details
-
-3. **IRS Score Breakdown**
-   - Bar chart: Variable A-E contribution
-   - Deductions highlighted in red
-
-4. **Decision Timeline**
-   - Agent execution flow (Triage → Document → ... → Underwriter)
-   - Execution times per agent
-
-5. **Suggested Amount Calculator (Interactive)**
-   - Slider: Adjust payment capacity
-   - Real-time suggested amount update
-
-**Tech Stack:**
-
-- Frontend: React + Recharts
-- Backend: Expose `/api/v1/cases/{case_id}/explainability` endpoint
-
-**Timeline:** 4 weeks (design + development)  
-**Dependencies:** UX/UI design, frontend resources  
-**Owner:** Frontend Dev + UX Designer
+> **Note:** The interactive explainability dashboard will be implemented on the **LAMAS side** (see [`docs/planning/lamas-integration-requirements.md`](file:///home/ibernabel/develop/aisa/financial-risk-agent-graph/docs/planning/lamas-integration-requirements.md)). CreditFlow is a stateless headless backend that provides comprehensive data in its API response, and LAMAS is responsible for presenting this data to analysts through a rich UI.
 
 ---
 
@@ -496,12 +410,12 @@ spec:
 | **P1**   | Confidence Calibration       | Ongoing  | High accuracy   | 90 days production data |
 | **P1**   | Suggested Amount Refinement  | 1 week   | Higher approval | Finance sign-off        |
 | **P2**   | Narrative Customization      | 2 weeks  | Better UX       | Product definitions     |
-| **P2**   | Haitian Creole Support       | 1 week   | Accessibility   | Translation service     |
 | **P3**   | ML for IRS Prediction        | 6 weeks  | Edge cases      | ML infra, data          |
 | **P3**   | Real-Time Credit Bureau      | 3 weeks  | Faster flow     | DataCrédito API         |
-| **P3**   | Explainability Dashboard     | 4 weeks  | Analyst trust   | UX design, frontend     |
 | **P4**   | Kubernetes Auto-Scaling      | 2 weeks  | High volume     | K8s cluster             |
 | **P4**   | Advanced Monitoring          | 3 weeks  | Reliability     | Observability stack     |
+
+> **Dashboard Implementation:** See [LAMAS Integration Requirements](file:///home/ibernabel/develop/aisa/financial-risk-agent-graph/docs/planning/lamas-integration-requirements.md) for detailed dashboard specifications (LAMAS-side).
 
 ---
 

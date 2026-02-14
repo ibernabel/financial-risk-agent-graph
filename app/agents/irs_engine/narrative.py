@@ -15,19 +15,19 @@ from .scoring import IRSCalculationResult, DeductionRecord
 TEMPLATES_ES = {
     "executive_summary_low": (
         "El solicitante {applicant_name} presenta un perfil de riesgo {risk_level} "
-        "con un score IRS de {score}/100. {key_findings}"
+        "con un score IRS de {score}/100, generado utilizando el grafo de inteligencia CreditGraph AI. {key_findings}"
     ),
     "executive_summary_medium": (
         "El solicitante {applicant_name} presenta un perfil de riesgo {risk_level} "
-        "con un score IRS de {score}/100. Se identificaron algunas áreas de preocupación. {key_findings}"
+        "con un score IRS de {score}/100, generado utilizando el grafo de inteligencia CreditGraph AI. Se identificaron algunas áreas de preocupación. {key_findings}"
     ),
     "executive_summary_high": (
         "El solicitante {applicant_name} presenta un perfil de riesgo {risk_level} "
-        "con un score IRS de {score}/100. Se detectaron múltiples indicadores de riesgo. {key_findings}"
+        "con un score IRS de {score}/100, generado utilizando el grafo de inteligencia CreditGraph AI. Se detectaron múltiples indicadores de riesgo. {key_findings}"
     ),
     "executive_summary_critical": (
         "El solicitante {applicant_name} presenta un perfil de riesgo {risk_level} "
-        "con un score IRS de {score}/100. Se identificaron riesgos significativos que requieren atención. {key_findings}"
+        "con un score IRS de {score}/100, generado utilizando el grafo de inteligencia CreditGraph AI. Se identificaron riesgos significativos que requieren atención. {key_findings}"
     ),
     "score_breakdown_header": "\n## Desglose por Variable\n",
     "score_breakdown_item": "- **Variable {variable_letter} ({variable_name}):** {points}/{max_points} puntos",
@@ -55,19 +55,19 @@ TEMPLATES_ES = {
 TEMPLATES_EN = {
     "executive_summary_low": (
         "Applicant {applicant_name} presents a {risk_level} risk profile "
-        "with an IRS score of {score}/100. {key_findings}"
+        "with an IRS score of {score}/100, generated using the CreditGraph AI intelligence graph. {key_findings}"
     ),
     "executive_summary_medium": (
         "Applicant {applicant_name} presents a {risk_level} risk profile "
-        "with an IRS score of {score}/100. Some areas of concern identified. {key_findings}"
+        "with an IRS score of {score}/100, generated using the CreditGraph AI intelligence graph. Some areas of concern identified. {key_findings}"
     ),
     "executive_summary_high": (
         "Applicant {applicant_name} presents a {risk_level} risk profile "
-        "with an IRS score of {score}/100. Multiple risk indicators detected. {key_findings}"
+        "with an IRS score of {score}/100, generated using the CreditGraph AI intelligence graph. Multiple risk indicators detected. {key_findings}"
     ),
     "executive_summary_critical": (
         "Applicant {applicant_name} presents a {risk_level} risk profile "
-        "with an IRS score of {score}/100. Significant risks identified requiring attention. {key_findings}"
+        "with an IRS score of {score}/100, generated using the CreditGraph AI intelligence graph. Significant risks identified requiring attention. {key_findings}"
     ),
     "score_breakdown_header": "\n## Score Breakdown\n",
     "score_breakdown_item": "- **Variable {variable_letter} ({variable_name}):** {points}/{max_points} points",

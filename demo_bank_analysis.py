@@ -197,7 +197,7 @@ async def analyze_bank_statement(bank_name: str, file_path: Path, declared_salar
 async def main():
     """Main demo function."""
     console.print(Panel(
-        "[bold cyan]CreditFlow AI - Bank Statement Analysis Demo[/bold cyan]\n\n"
+        "[bold cyan]CreditGraph AI - Bank Statement Analysis Demo[/bold cyan]\n\n"
         "This demo analyzes bank statements from three Dominican banks:\n"
         "• Banco BHD León\n"
         "• Banco Popular Dominicano\n"
@@ -207,7 +207,7 @@ async def main():
         "✓ Salary detection and payroll day identification\n"
         "✓ Financial pattern detection (FIN-01 to FIN-05)\n"
         "✓ Risk flag generation",
-        title="[bold green]🏦 Welcome to CreditFlow AI[/bold green]",
+        title="[bold green]🏦 Welcome to CreditGraph AI[/bold green]",
         border_style="green",
         padding=(1, 2)
     ))

@@ -1,5 +1,5 @@
 """
-CreditFlow AI - Financial Risk Analysis Agent System
+CreditGraph AI - Financial Risk Analysis Agent System
 
 A production-grade AI agent system for automated credit risk assessment
 using LangGraph orchestration and multi-provider LLM support.

@@ -1,4 +1,4 @@
-# CreditFlow AI - Project Roadmap
+# CreditGraph AI - Project Roadmap
 
 ## Phase 1: Foundation ✅ **COMPLETED** (Weeks 1-2, Feb 2026)
 
@@ -11,6 +11,7 @@
 - [x] 1.3 - Implement basic graph flow with stub agents
 - [x] 1.4 - Set up PostgreSQL for checkpointing
 - [x] 1.5 - Configure environment variables and secrets management
+- [x] 1.6 - **REBRANDING**: Transition from CreditFlow AI to CreditGraph AI (ADR-001)
 
 **Exit Criteria:** ✅ API accepts requests, routes through stub agents, returns mock response.
 

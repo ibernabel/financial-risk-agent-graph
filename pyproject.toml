@@ -1,7 +1,7 @@
 [project]
-name = "financial-risk-agent-graph"
+name = "creditgraph-ai"
 version = "0.1.0"
-description = "CreditFlow AI - Financial Risk Analysis Agent System"
+description = "CreditGraph AI - Financial Risk Analysis Agent System"
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
 dependencies = [

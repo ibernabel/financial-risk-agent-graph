@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 
 def main():
     """
-CreditFlow AI - Main Application Entry Point
+CreditGraph AI - Main Application Entry Point
 
 FastAPI application with LangGraph orchestration for credit risk analysis.
 """
@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
     Handles startup and shutdown events.
     """
     # Startup
-    print("🚀 Starting CreditFlow AI...")
+    print("🚀 Starting CreditGraph AI...")
     print(f"Environment: {settings.api.environment}")
     print(f"Debug mode: {settings.api.debug}")
 
@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
-    print("🛑 Shutting down CreditFlow AI...")
+    print("🛑 Shutting down CreditGraph AI...")
     await db.disconnect()
     print("✅ Database disconnected")
 

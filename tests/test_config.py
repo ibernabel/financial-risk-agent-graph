@@ -10,7 +10,7 @@ def test_settings_load_defaults():
     """Test that settings load with default values."""
     settings = Settings()
 
-    assert settings.api.name == "CreditFlow AI"
+    assert settings.api.name == "CreditGraph AI"
     assert settings.api.version == "0.1.0"
     assert settings.api.port == 8000
     assert settings.llm.default_provider in ["anthropic", "openai", "google"]

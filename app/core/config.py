@@ -84,7 +84,7 @@ class LLMSettings(BaseSettings):
 class APISettings(BaseSettings):
     """FastAPI application configuration."""
 
-    name: str = Field(default="CreditFlow AI", description="Application name")
+    name: str = Field(default="CreditGraph AI", description="Application name")
     version: str = Field(default="0.1.0", description="Application version")
     environment: Literal["development", "staging", "production"] = Field(
         default="development", description="Environment"

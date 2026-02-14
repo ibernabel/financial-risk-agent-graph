@@ -1,5 +1,5 @@
 """
-LangGraph orchestration for CreditFlow AI agent workflow.
+LangGraph orchestration for CreditGraph AI agent workflow.
 
 Defines the graph structure, routing logic, and checkpointing.
 """

@@ -1,5 +1,5 @@
 """
-FastAPI endpoints for CreditFlow AI.
+FastAPI endpoints for CreditGraph AI.
 
 Provides REST API for credit risk analysis.
 """
@@ -101,7 +101,7 @@ async def execute_analysis(request: AnalysisRequest) -> AnalysisResponse:
         config = {
             "configurable": {
                 "thread_id": request.case_id,
-                "checkpoint_ns": "creditflow",
+                "checkpoint_ns": "creditgraph",
             }
         }
 

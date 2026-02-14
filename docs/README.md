@@ -1,6 +1,6 @@
 # Documentation Index
 
-Welcome to the CreditFlow AI project documentation. This directory is the Single Source of Truth (SSOT) for all strategic, technical, and testing information.
+Welcome to the CreditGraph AI project documentation. This directory is the Single Source of Truth (SSOT) for all strategic, technical, and testing information.
 
 ## 📂 Navigation
 

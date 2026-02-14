@@ -1,4 +1,4 @@
-# CreditFlow AI - Product Requirements Document (PRD)
+# CreditGraph AI - Product Requirements Document (PRD)
 
 **Version:** 2.0 (Final)  
 **Author:** Idequel Bernabel  
@@ -20,7 +20,7 @@ Financial institutions in the Dominican Republic face a critical bottleneck in c
 
 ### Proposed Solution
 
-**CreditFlow AI** is a headless microservice API that orchestrates specialized AI agents to perform forensic credit analysis. The system:
+**CreditGraph AI** is a headless microservice API that orchestrates specialized AI agents to perform forensic credit analysis. The system:
 
 - Receives applicant data and documents via REST API from LAMAS (Loan Management System)
 - Executes parallel analysis using specialized agents (Triage, OSINT, Financial, IRS)
@@ -82,7 +82,7 @@ Financial institutions in the Dominican Republic face a critical bottleneck in c
 sequenceDiagram
     participant User as Analyst (LAMAS)
     participant LAMAS as LAMAS System
-    participant API as CreditFlow API
+    participant API as CreditGraph API
     participant Graph as LangGraph Orchestrator
     participant Agents as Agent Layer
     participant Tools as External Tools
@@ -133,7 +133,7 @@ graph TD
         LaborCalc[Labor Calculator API]
     end
 
-    subgraph CreditFlow["CreditFlow Engine (Python/FastAPI)"]
+    subgraph CreditGraph["CreditGraph Engine (Python/FastAPI)"]
         API[API Controller]
 
         subgraph Core["Application Core"]
